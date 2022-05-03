@@ -2,7 +2,7 @@
 
 This script will automatically crawling data from CWB website, create voronoi polygon and calculate rainfall data.
 
-## Environement Setup
+## Environment Setup
 
 ### Windows
 
@@ -31,3 +31,15 @@ pip install -r requirements.txt
 ```
 python run.py
 ```
+
+## Output Data
+
+-   `rain_station.dbf/.prj/.shp/.shx`: Rain stations shapefile with station information attribute.
+-   `voronoi_<timestemp>.cpg/.dbf/.prj/.shp/.shx`: The voronoi polygon of selected city area.
+-   `voronoi_<timestemp>_final_<timestemp>.cpg/.dbf/.prj/.shp/.shx`: The voronoi polygon of reservior area.
+-   `<CityName>_<StationID>.csv`: Rainfall data crawled from CWB website
+-   `all_rainfall_data.json`: All rainfall data crawled from CWB website.
+-   `rainfall_coronoi_all.cpg/.dbf/.prj/.shp/.shx`: The voronoi polygon of reservior area shapefile with all rainfall monthly attribute.
+-   `rainfall_coronoi_all.csv`: Rainfall monthly data of reservior area.
+-   `irrigation_rainfall_voronoi_all.cpg/.dbf/.prj/.shp/.shx`: The voronoi polygon of reservior area shapefile with irrigation rainfall monthly attribute.
+-   `irrigation_rainfall_voronoi_all.csv`: Irrigation rainfall monthly data of reservior area.
