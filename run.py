@@ -1,3 +1,23 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Script Name :run.py
+Author      :JY Hsu
+Email       :jyhsu506@gmail.com
+
+Description  :
+    This script will automatically get rain data and calculate total rainfall data.
+
+Steps        :
+    Step 1 - Get rainfall station list.
+    Step 2 - Filter station list by city and year.
+    Step 3 - Create rain station shapefile.
+    Step 4 - Create and save voronoi shape by using rain station location.
+    Step 5 - Mask voronoi shape with mask layer.
+    Step 6 - Get monthly rainfall data from CWB website.
+    Step 7 - Calculate rainfall/irrigation data and save to files.
+"""
+
 import requests
 import shapefile
 import csv
@@ -16,22 +36,33 @@ from geovoronoi import voronoi_regions_from_coords, points_to_coords
 
 def run():
     YEAR_LIST = ["2019", "2020", "2021"]
+    # Get rainfall station list
     all_stations, headings = get_station_list()
+    # Filter station list by city and year
     filtered_stations_city = get_stations_by_city(
         all_stations, ["嘉義縣", "嘉義市", "臺南市"])
     filtered_stations_year = get_stations_by_year(
         filtered_stations_city, YEAR_LIST)
+    # Create rain station shapefile
     create_shapefile(filtered_stations_year, headings, "rain_station")
+    # Create and save voronoi shape by using rain station location
     voronoi_shp_file = create_voronoi_shape(point_shp_filename="./Data/rain_station.shp",
                                             boundary_shp_filename="./Data/county_moi/COUNTY_MOI_1090820_clip.shp")
+    # Mask voronoi shape with mask layer
     voronoi_reservior_shape_path = mask_voromoi_with_reservior(
         voronoi_shp_file)
+    # Get monthly rainfall data from CWB website
     all_rain_data, rainfall_headings = get_rain_monthly_data(
         filtered_stations_year, YEAR_LIST)
+    # Calculate rainfall data and save to files
     calc_rainfall(all_rain_data, rainfall_headings,
                   voronoi_reservior_shape_path, YEAR_LIST)
+    # Calculate irrigation data and save to files
     calc_rainfall(all_rain_data, rainfall_headings,
-                  voronoi_reservior_shape_path, YEAR_LIST, output_filename="irrigation_rainfall_voronoi_all", coefficient=1.0*0.17*0.89)
+                  voronoi_reservior_shape_path,
+                  YEAR_LIST,
+                  output_filename="irrigation_rainfall_voronoi_all",
+                  coefficient=1.0*0.17*0.89)
 
 
 def get_station_list():
@@ -226,9 +257,13 @@ def clip_shapefile(gdf, mask, output_name):
     return output_name
 
 
-def calc_rainfall(all_rain_data, heading, voronoi_shp_path, year_list, month_list=list(range(1, 13)), output_filename="rainfall_voronoi_all", coefficient=1.0):
-    RESULT_FILENAME = "rainfall_voronoi_all"
-    RESULT_FILENAME_IRRIGATION = "irrigation_rainfall_voronoi_all"
+def calc_rainfall(all_rain_data,
+                  heading,
+                  voronoi_shp_path,
+                  year_list,
+                  month_list=list(range(1, 13)),
+                  output_filename="rainfall_voronoi_all",
+                  coefficient=1.0):
     csv_sum_rainfall = []
     data = all_rain_data
     if isinstance(all_rain_data, str):
