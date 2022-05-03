@@ -30,6 +30,8 @@ def run():
         filtered_stations_year, YEAR_LIST)
     calc_rainfall(all_rain_data, rainfall_headings,
                   voronoi_reservior_shape_path, YEAR_LIST)
+    calc_rainfall(all_rain_data, rainfall_headings,
+                  voronoi_reservior_shape_path, YEAR_LIST, output_filename="irrigation_rainfall_voronoi_all", coefficient=1.0*0.17*0.89)
 
 
 def get_station_list():
@@ -224,8 +226,9 @@ def clip_shapefile(gdf, mask, output_name):
     return output_name
 
 
-def calc_rainfall(all_rain_data, heading, voronoi_shp_path, year_list, month_list=list(range(1, 13))):
+def calc_rainfall(all_rain_data, heading, voronoi_shp_path, year_list, month_list=list(range(1, 13)), output_filename="rainfall_voronoi_all", coefficient=1.0):
     RESULT_FILENAME = "rainfall_voronoi_all"
+    RESULT_FILENAME_IRRIGATION = "irrigation_rainfall_voronoi_all"
     csv_sum_rainfall = []
     data = all_rain_data
     if isinstance(all_rain_data, str):
@@ -248,7 +251,7 @@ def calc_rainfall(all_rain_data, heading, voronoi_shp_path, year_list, month_lis
             count_month = 0
             for month in month_list:
                 rainfall_precp_monthly = rainfall_precp[count_month] * \
-                    voronoi_shp["Area"][count]*1*math.pow(10, -6)
+                    voronoi_shp["Area"][count]*1*math.pow(10, -6)*coefficient
                 count_month += 1
                 if str(month) not in station_precp_monthly_sum_attr.keys():
                     station_precp_monthly_sum_attr[str(month)] = []
@@ -256,7 +259,7 @@ def calc_rainfall(all_rain_data, heading, voronoi_shp_path, year_list, month_lis
                     rainfall_precp_monthly)
 
             rainfall_precp_sum = sum(rainfall_precp) * \
-                voronoi_shp["Area"][count]*1*math.pow(10, -6)
+                voronoi_shp["Area"][count]*1*math.pow(10, -6)*coefficient
             station_precp_yearly_sum_attr.append(rainfall_precp_sum)
             count += 1
         for month in month_list:
@@ -267,8 +270,8 @@ def calc_rainfall(all_rain_data, heading, voronoi_shp_path, year_list, month_lis
         voronoi_shp['%s' % year] = station_precp_yearly_sum_attr
         csv_sum_rainfall.append(["%s" % (year), sum(
             station_precp_yearly_sum_attr)])
-    voronoi_shp.to_file("./Data/%s.shp" % RESULT_FILENAME)
-    with open('./Data/%s.csv' % RESULT_FILENAME, 'w', newline='') as f:
+    voronoi_shp.to_file("./Data/%s.shp" % output_filename)
+    with open('./Data/%s.csv' % output_filename, 'w', newline='') as f:
         write = csv.writer(f)
         write.writerows(csv_sum_rainfall)
 
